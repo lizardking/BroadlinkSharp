@@ -11,7 +11,7 @@ namespace BroadlinkSharp
     {
         public Dooya(IPEndPoint host, byte[] mac, int devtype, int timeout = 10):base(host,mac,devtype,timeout)
         {
-            DeviceTypeDescription = "Dooya DT360E";
+           
         }
 
         //def _send(self, magic1, magic2):

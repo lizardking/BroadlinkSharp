@@ -9,71 +9,42 @@ namespace BroadlinkSharp
 {
     public class BroadLinkDiscovery
     {
-        private static BroadlinkDevice gendevice(int devtype, IPEndPoint host, byte[] mac)
+        private static Dictionary<int, Type> deviceTypesDictionary = null;
+
+        private static Dictionary<int, Type> GetDeviceTypesDictionary()
+        {
+            if (deviceTypesDictionary == null)
+            {
+                deviceTypesDictionary = new Dictionary<int, Type>();
+
+                foreach (Type broadlinkDeviceType in typeof(BroadlinkDevice).Assembly.GetTypes().Where(t => t != typeof(BroadlinkDevice) && typeof(BroadlinkDevice).IsAssignableFrom(t)))
+                {
+                    foreach (BroadlinkDeviceAttribute broadlinkDeviceAttribute in broadlinkDeviceType.GetCustomAttributes(typeof(BroadlinkDeviceAttribute), true).Select(a => a as BroadlinkDeviceAttribute))
+                    {
+                        if (deviceTypesDictionary.ContainsKey(broadlinkDeviceAttribute.DeviceTypeCode))
+                        {
+                            throw new Exception($"The {nameof(BroadlinkDeviceAttribute.DeviceTypeCode)} {broadlinkDeviceAttribute.DeviceTypeCode} of the {nameof(BroadlinkDeviceAttribute)} has been defined more than once. It has been defined for the type {deviceTypesDictionary[broadlinkDeviceAttribute.DeviceTypeCode].Name} and also for type {broadlinkDeviceType.Name}");
+                        }
+                        deviceTypesDictionary.Add(broadlinkDeviceAttribute.DeviceTypeCode, broadlinkDeviceType);
+                    }
+                }
+            }
+            return deviceTypesDictionary;
+        }
+
+
+
+        private static BroadlinkDevice Gendevice(int deviceTypeCode, IPEndPoint host, byte[] mac)
         {
 
-            Dictionary<string, int[]> devices = new Dictionary<string, int[]>
+            if (GetDeviceTypesDictionary().TryGetValue(deviceTypeCode, out Type deviceType))
             {
-                ["sp1"] = new int[] { 0 },
-                ["sp2"] = new int[] {0x2711,                          // SP2
-                0x2719, 0x7919, 0x271a, 0x791a,  // Honeywell SP2
-                0x2720,                          // SPMini
-                0x753e,                          // SP3
-                0x7D00,                          // OEM branded SP3
-                0x947a, 0x9479,                  // SP3S
-                0x2728,                          // SPMini2
-                0x2733, 0x273e,                  // OEM branded SPMini
-                0x7530, 0x7918,                  // OEM branded SPMini2
-                0x2736                           // SPMiniPlus
-                },
-                ["rm"] = new int[]{0x2712,  // RM2
-               0x2737,  // RM Mini
-               0x273d,  // RM Pro Phicomm
-               0x2783,  // RM2 Home Plus
-               0x277c,  // RM2 Home Plus GDT
-               0x272a,  // RM2 Pro Plus
-               0x2787,  // RM2 Pro Plus2
-               0x279d,  // RM2 Pro Plus3
-               0x27a9,  // RM2 Pro Plus_300
-               0x278b,  // RM2 Pro Plus BL
-               0x2797,  // RM2 Pro Plus HYC
-               0x27a1,  // RM2 Pro Plus R1
-               0x27a6,  // RM2 Pro PP
-               0x278f   // RM Mini Shate
-               },
-                ["a1"] = new int[] { 0x2714 },  // A1
-                ["mp1"] = new int[]{0x4EB5,  // MP1
-                0x4EF7   // Honyar oem mp1
-                },
-                ["hysen"] = new int[] { 0x4EAD },  // Hysen controller
-                ["S1C"] = new int[] { 0x2722 },  // S1 (SmartOne Alarm Kit)
-                ["Dooya"] = new int[] { 0x4E4D }  // Dooya DT360E (DOOYA_CURTAIN_V2)
-            };
-
-            // Look for the class associated to devtype in devices
-            string className = devices.Where(KV => KV.Value.Contains(devtype)).Select(KV => KV.Key).FirstOrDefault();
-
-
-            //  [deviceClass] = [dev for dev in devices if devtype in devices[dev]] or[None]
-            //  if(deviceClass is None= {
-            //    return device(host= host, mac= mac, devtype= devtype)
-            //            } else {
-            //return deviceClass(host= host, mac= mac, devtype= devtype)
-
-            if (string.IsNullOrWhiteSpace(className))
-            {
-                //Return generic Device class
-                return new BroadlinkDevice(host, mac, devtype);
+                return (BroadlinkDevice)Activator.CreateInstance(deviceType, new object[] { host, mac, deviceTypeCode, 10 });
             }
             else
             {
-                //Return specific class
-                Type deviceType = typeof(BroadlinkDevice).Assembly.GetTypes().Where(t => t != typeof(BroadlinkDevice) && typeof(BroadlinkDevice).IsAssignableFrom(t)).FirstOrDefault(t => t.Name == className);
-
-                return (BroadlinkDevice)Activator.CreateInstance(deviceType, new object[] { host, mac, devtype, 10 });
-            };
-
-
+                return new BroadlinkDevice(host, mac, deviceTypeCode, 10);
+            }
 
 
         }
@@ -94,7 +65,7 @@ namespace BroadlinkSharp
 
 
         //def discover(timeout= None, local_ip_address= None):
-        public static List<BroadlinkDevice> Discover(int timeout, string local_ip_address=null)
+        public static List<BroadlinkDevice> Discover(int timeout, string local_ip_address = null)
         {
 
 
@@ -233,7 +204,7 @@ namespace BroadlinkSharp
                 Array.ConstrainedCopy(response, 0x3a, mac, 0, 6);
                 int devtype = response[0x34] | response[0x35] << 8;
 
-                devices.Add(gendevice(devtype, (IPEndPoint)host, mac));
+                devices.Add(Gendevice(devtype, (IPEndPoint)host, mac));
 
             }
             else
@@ -266,7 +237,7 @@ namespace BroadlinkSharp
                         Array.ConstrainedCopy(response, 0x3a, mac, 0, 6);
                         int devtype = response[0x34] | response[0x35] << 8;
 
-                        devices.Add(gendevice(devtype, (IPEndPoint)host, mac));
+                        devices.Add(Gendevice(devtype, (IPEndPoint)host, mac));
                     }
                     catch (Exception E)
                     {

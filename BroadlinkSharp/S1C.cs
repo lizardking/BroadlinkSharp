@@ -10,7 +10,7 @@ namespace BroadlinkSharp
     {
         public S1C(IPEndPoint host, byte[] mac, int devtype, int timeout = 10) : base(host, mac, devtype, timeout)
         {
-            DeviceTypeDescription = "S1C";
+           
         }
     }
 }

@@ -13,7 +13,7 @@ namespace BroadlinkSharpTest
             Console.WriteLine($"Discover: {(DateTime.Now - s).TotalMilliseconds:0}ms");
 
             s = DateTime.Now;
-            D.Auth();
+            D.Authorize();
             Console.WriteLine($"Auth: {(DateTime.Now - s).TotalMilliseconds:0}ms");
 
             s = DateTime.Now;

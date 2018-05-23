@@ -10,7 +10,7 @@ namespace BroadlinkSharp
     {
         public Hysen(IPEndPoint host, byte[] mac, int devtype, int timeout = 10) : base(host, mac, devtype, timeout)
         {
-            DeviceTypeDescription = "Hysen heating controller";
+           
         }
     }
 }

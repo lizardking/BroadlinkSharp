@@ -13,13 +13,13 @@ namespace BroadlinkSharp
     {
         Random Rnd = new Random();
 
-        public BroadlinkDevice(IPEndPoint host, byte[] mac, int devtype, int timeout = 10)
+        public BroadlinkDevice(IPEndPoint host, byte[] mac, int deviceTypeCode, int timeout = 10)
         {
-            Init(host, mac, devtype, timeout);
+            Init(host, mac, deviceTypeCode, timeout);
         }
 
 
-        private void Init(IPEndPoint host, byte[] mac, int devtype, int timeout = 10)
+        private void Init(IPEndPoint host, byte[] mac, int deviceTypeCode, int timeout = 10)
         {
             //self.host = host
             //self.mac = mac
@@ -28,7 +28,10 @@ namespace BroadlinkSharp
             //self.count = random.randrange(0xffff)
             this.host = host;
             this.mac = mac;
-            this.devtype = devtype;
+            this.DeviceTypeCode = deviceTypeCode;
+
+
+
             this.timeout = timeout;
             this.count = Rnd.Next(0xffff);
 
@@ -59,7 +62,7 @@ namespace BroadlinkSharp
 
         private IPEndPoint host;
         private byte[] mac;
-        private int devtype;
+        public int DeviceTypeCode { get; private set; }
         private int timeout = 10;
         private int count = 0;
 
@@ -73,10 +76,30 @@ namespace BroadlinkSharp
         private byte[] id = { 0, 0, 0, 0 };
 
         //self.type = "Unknown"
-        public string DeviceTypeDescription { get; protected set; } = "Unknown";
+        private string _DeviceTypeDescription = null;
+        public string DeviceTypeDescription
+        {
+            get
+            {
+                if (_DeviceTypeDescription == null)
+                {
+                    BroadlinkDeviceAttribute broadlinkDeviceAttribute = this.GetType().GetCustomAttributes(typeof(BroadlinkDeviceAttribute), true).Select(a => a as BroadlinkDeviceAttribute).FirstOrDefault(ba => ba.DeviceTypeCode == this.DeviceTypeCode);
+                    if (broadlinkDeviceAttribute != null)
+                    {
+                        _DeviceTypeDescription = broadlinkDeviceAttribute.DeviceTypeDescription;
+
+                    }
+                    if (string.IsNullOrWhiteSpace(_DeviceTypeDescription))
+                    {
+                        _DeviceTypeDescription = $"Unknown {this.GetType().Name} (DeviceTypeCode : {DeviceTypeCode:X})";
+                    }
+                }
+                return _DeviceTypeDescription;
+            }
+        }
 
         //self.lock = threading.Lock()
-        private object locker = new object();
+        private readonly object locker = new object();
 
 
         //ENcryption routines
@@ -151,7 +174,7 @@ namespace BroadlinkSharp
             }
         }
 
-        public bool Auth()
+        public bool Authorize()
         {
             byte[] payload = new byte[0x50];
             payload[0x04] = 0x31;
@@ -323,7 +346,7 @@ namespace BroadlinkSharp
                         cs.SendTo(packet, host);
                         //Timeout set in init method    
                         EndPoint receivedFrom = new IPEndPoint(0, 0);
-                        bytesReceived=cs.ReceiveFrom(response, ref receivedFrom);
+                        bytesReceived = cs.ReceiveFrom(response, ref receivedFrom);
 
                         break;
                     }
