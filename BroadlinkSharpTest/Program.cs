@@ -1,5 +1,6 @@
 ﻿using BroadlinkSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BroadlinkSharpTest
@@ -8,24 +9,42 @@ namespace BroadlinkSharpTest
     {
         static void Main(string[] args)
         {
+
+
             DateTime s = DateTime.Now;
-            Dooya D = BroadLinkDiscovery.Discover(0, null).First() as Dooya; ;
+
+            List<BroadlinkDevice> devices = BroadLinkDiscovery.Discover(2, null);
+
             Console.WriteLine($"Discover: {(DateTime.Now - s).TotalMilliseconds:0}ms");
 
-            s = DateTime.Now;
-            D.Authorize();
-            Console.WriteLine($"Auth: {(DateTime.Now - s).TotalMilliseconds:0}ms");
+            Console.WriteLine($"Found {devices.Count} Broadlink devices:");
+            foreach (BroadlinkDevice device in devices)
+            {
+                Console.WriteLine($"  Class: {device.GetType().Name}, Description: {device.DeviceTypeDescription}, Code: {device.DeviceTypeCode}");
+            }
+            Console.WriteLine();
+
+            Dooya dooyaCurtainMotor = devices.Select(d => d as Dooya).FirstOrDefault();
+            if(dooyaCurtainMotor==null)
+            {
+                Console.WriteLine($"Found no {nameof(Dooya)} device in the list of discovered devices.");
+                Console.WriteLine("Press enter to exit");
+                Console.ReadLine();
+                return;
+            }
+
+            Console.WriteLine($"Will control {nameof(Dooya)} device with mac address {dooyaCurtainMotor.MacAddress}");
+            Console.WriteLine("Press o to open, c to close and s to stop the curtain motor. Presss x to exit.");
+            Console.WriteLine();
 
             s = DateTime.Now;
-            D.Close();
-            Console.WriteLine($"Close command: {(DateTime.Now - s).TotalMilliseconds:0}ms");
+            dooyaCurtainMotor.Authorize();
+            Console.WriteLine($"Authorized: {(DateTime.Now - s).TotalMilliseconds:0}ms");
+            Console.WriteLine();
+            Console.WriteLine();
 
-            //DateTime s = DateTime.Now;
-            //while ((DateTime.Now-s).TotalSeconds<20 && !Console.KeyAvailable)
-            //{
-            //    Console.WriteLine(D.GetPercentage());
-            //    System.Threading.Thread.Sleep(500);
-            //}
+
+
 
             Console.WriteLine("");
             bool exitloop = false;
@@ -35,37 +54,36 @@ namespace BroadlinkSharpTest
                 {
                     char key = Console.ReadKey().KeyChar;
                     Console.SetCursorPosition(0, Console.CursorTop);
+                    s = DateTime.Now;
                     switch (key)
                     {
                         case 'o':
-                            D.Open();
+                            dooyaCurtainMotor.Open();
                             Console.WriteLine("Open");
-                            Console.WriteLine("");
-
                             break;
                         case 'c':
-                            D.Close();
+                            dooyaCurtainMotor.Close();
                             Console.WriteLine("Close");
-                            Console.WriteLine("");
-
                             break;
                         case 's':
-                            D.Stop();
+                            dooyaCurtainMotor.Stop();
                             Console.WriteLine("Stop");
-                            Console.WriteLine("");
                             break;
                         case 'x':
                             exitloop = true;
                             break;
                         default:
                             Console.WriteLine("Unsupported Key");
-                            Console.WriteLine("");
                             break;
                     }
+                    Console.WriteLine($"command duration: {(DateTime.Now - s).TotalMilliseconds:0}ms");
+                    Console.WriteLine();
                 } else
                 {
                     Console.SetCursorPosition(0, Console.CursorTop - 1);
-                    Console.WriteLine($"Curtain {D.GetPercentage()}% closed        ");
+                    s = DateTime.Now;
+                    int percentage = dooyaCurtainMotor.GetPercentage();
+                    Console.WriteLine($"Curtain {dooyaCurtainMotor.GetPercentage()}% open. GetPercentage command duration: {(DateTime.Now - s).TotalMilliseconds:0} ms          ");
                 }
 
             }

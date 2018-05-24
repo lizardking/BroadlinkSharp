@@ -1,4 +1,8 @@
-﻿using System;
+﻿//The static BroadLinkDiscovery class is used to dicover the Broadlink devices on the network. 
+//Code is based on https://github.com/mjg59/python-broadlink/blob/master/broadlink/__init__.py
+//The gendevice logic has been changed to used attributes on the device classes instead of using a fixed dictionary like in the org code. 
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
@@ -7,8 +11,135 @@ using System.Net;
 
 namespace BroadlinkSharp
 {
-    public class BroadLinkDiscovery
+    public static class BroadLinkDiscovery
     {
+        #region Org Code from https://github.com/mjg59/python-broadlink/blob/master/broadlink/__init__.py
+
+        //def gendevice(devtype, host, mac):
+        //  devices = {
+        //          sp1: [0],
+        //          sp2: [0x2711,                          # SP2
+        //                0x2719, 0x7919, 0x271a, 0x791a,  # Honeywell SP2
+        //                0x2720,                          # SPMini
+        //                0x753e,                          # SP3
+        //                0x7D00,                          # OEM branded SP3
+        //                0x947a, 0x9479,                  # SP3S
+        //                0x2728,                          # SPMini2
+        //                0x2733, 0x273e,                  # OEM branded SPMini
+        //                0x7530, 0x7918,                  # OEM branded SPMini2
+        //                0x2736                           # SPMiniPlus
+        //                ],
+        //          rm: [0x2712,  # RM2
+        //               0x2737,  # RM Mini
+        //               0x273d,  # RM Pro Phicomm
+        //               0x2783,  # RM2 Home Plus
+        //               0x277c,  # RM2 Home Plus GDT
+        //               0x272a,  # RM2 Pro Plus
+        //               0x2787,  # RM2 Pro Plus2
+        //               0x279d,  # RM2 Pro Plus3
+        //               0x27a9,  # RM2 Pro Plus_300
+        //               0x278b,  # RM2 Pro Plus BL
+        //               0x2797,  # RM2 Pro Plus HYC
+        //               0x27a1,  # RM2 Pro Plus R1
+        //               0x27a6,  # RM2 Pro PP
+        //               0x278f   # RM Mini Shate
+        //               ],
+        //          a1: [0x2714],  # A1
+        //          mp1: [0x4EB5,  # MP1
+        //                0x4EF7   # Honyar oem mp1
+        //                ],
+        //          hysen: [0x4EAD],  # Hysen controller
+        //          S1C: [0x2722],  # S1 (SmartOne Alarm Kit)
+        //          dooya: [0x4E4D]  # Dooya DT360E (DOOYA_CURTAIN_V2)
+        //          }
+        //
+        //  # Look for the class associated to devtype in devices
+        //  [deviceClass] = [dev for dev in devices if devtype in devices[dev]] or [None]
+        //  if deviceClass is None:
+        //    return device(host=host, mac=mac, devtype=devtype)
+        //  return deviceClass(host=host, mac=mac, devtype=devtype)
+        //
+        //def discover(timeout=None, local_ip_address=None):
+        //  if local_ip_address is None:
+        //      s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        //      s.connect(('8.8.8.8', 53))  # connecting to a UDP address doesn't send packets
+        //      local_ip_address = s.getsockname()[0]
+        //  address = local_ip_address.split('.')
+        //  cs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        //  cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        //  cs.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        //  cs.bind((local_ip_address,0))
+        //  port = cs.getsockname()[1]
+        //  starttime = time.time()
+        //
+        //  devices = []
+        //
+        //  timezone = int(time.timezone/-3600)
+        //  packet = bytearray(0x30)
+        //
+        //  year = datetime.now().year
+        //
+        //  if timezone < 0:
+        //    packet[0x08] = 0xff + timezone - 1
+        //    packet[0x09] = 0xff
+        //    packet[0x0a] = 0xff
+        //    packet[0x0b] = 0xff
+        //  else:
+        //    packet[0x08] = timezone
+        //    packet[0x09] = 0
+        //    packet[0x0a] = 0
+        //    packet[0x0b] = 0
+        //  packet[0x0c] = year & 0xff
+        //  packet[0x0d] = year >> 8
+        //  packet[0x0e] = datetime.now().minute
+        //  packet[0x0f] = datetime.now().hour
+        //  subyear = str(year)[2:]
+        //  packet[0x10] = int(subyear)
+        //  packet[0x11] = datetime.now().isoweekday()
+        //  packet[0x12] = datetime.now().day
+        //  packet[0x13] = datetime.now().month
+        //  packet[0x18] = int(address[0])
+        //  packet[0x19] = int(address[1])
+        //  packet[0x1a] = int(address[2])
+        //  packet[0x1b] = int(address[3])
+        //  packet[0x1c] = port & 0xff
+        //  packet[0x1d] = port >> 8
+        //  packet[0x26] = 6
+        //  checksum = 0xbeaf
+        //
+        //  for i in range(len(packet)):
+        //      checksum += packet[i]
+        //  checksum = checksum & 0xffff
+        //  packet[0x20] = checksum & 0xff
+        //  packet[0x21] = checksum >> 8
+        //
+        //  cs.sendto(packet, ('255.255.255.255', 80))
+        //  if timeout is None:
+        //    response = cs.recvfrom(1024)
+        //    responsepacket = bytearray(response[0])
+        //    host = response[1]
+        //    mac = responsepacket[0x3a:0x40]
+        //    devtype = responsepacket[0x34] | responsepacket[0x35] << 8
+        //
+        //
+        //    return gendevice(devtype, host, mac)
+        //  else:
+        //    while (time.time() - starttime) < timeout:
+        //      cs.settimeout(timeout - (time.time() - starttime))
+        //      try:
+        //        response = cs.recvfrom(1024)
+        //      except socket.timeout:
+        //        return devices
+        //      responsepacket = bytearray(response[0])
+        //      host = response[1]
+        //      devtype = responsepacket[0x34] | responsepacket[0x35] << 8
+        //      mac = responsepacket[0x3a:0x40]
+        //      dev = gendevice(devtype, host, mac)
+        //      devices.append(dev)
+        //return devices 
+        #endregion
+
+
         private static Dictionary<int, Type> deviceTypesDictionary = null;
 
         private static Dictionary<int, Type> GetDeviceTypesDictionary()
@@ -239,7 +370,7 @@ namespace BroadlinkSharp
 
                         devices.Add(Gendevice(devtype, (IPEndPoint)host, mac));
                     }
-                    catch (Exception E)
+                    catch 
                     {
                         break;
 
