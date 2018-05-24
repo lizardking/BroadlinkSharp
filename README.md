@@ -4,6 +4,8 @@ C# class library to control Broadlink devices.
 
 The code in the lib is based on the Python implementation at https://github.com/mjg59/python-broadlink
 
+More information on the Broadlink protocol can be found at https://blog.ipsumdomus.com/broadlink-smart-home-devices-complete-protocol-hack-bc0b4b397af1
+
 Usage
 -----
 
