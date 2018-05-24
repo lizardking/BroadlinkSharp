@@ -11,6 +11,9 @@ using System.Net;
 
 namespace BroadlinkSharp
 {
+    /// <summary>
+    /// Used to find the Broadlink devices on the network.
+    /// </summary>
     public static class BroadLinkDiscovery
     {
         #region Org Code from https://github.com/mjg59/python-broadlink/blob/master/broadlink/__init__.py
@@ -195,79 +198,41 @@ namespace BroadlinkSharp
         }
 
 
-        //def discover(timeout= None, local_ip_address= None):
-        public static List<BroadlinkDevice> Discover(int timeout, string local_ip_address = null)
+
+        /// <summary>
+        /// Discovers the Broadlink devices on the network
+        /// </summary>
+        /// <param name="Timeout">Timeout in seconds. 0 will only discover 1 device, values >0 might discover several devices (discovery of several devices is not tested since I only own 1 Broadlink devices).</param>
+        /// <param name="LocalIpAddress">The local ip address. If para is null or blank, the IP of the computer running the code is used. If your computer has several IP addresses you might need to specify the correct one (Untested)(</param>
+        /// <returns>List of BroadlinkDevices classes</returns>
+        public static List<BroadlinkDevice> Discover(int Timeout, string LocalIpAddress = null)
         {
 
-
-            //if local_ip_address is None:
-            //    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            //    s.connect(('8.8.8.8', 53))  # connecting to a UDP address doesn't send packets
-            //    local_ip_address = s.getsockname()[0]
-            if (string.IsNullOrWhiteSpace(local_ip_address))
+            if (string.IsNullOrWhiteSpace(LocalIpAddress))
             {
-                local_ip_address = GetLocalIPAddress();
+                LocalIpAddress = GetLocalIPAddress();
             }
 
-            //address = local_ip_address.split('.') - Dont know yet what this is used for
-            //cs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            //cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            //cs.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            //cs.bind((local_ip_address, 0))
 
             Socket cs = new Socket(SocketType.Dgram, ProtocolType.IP);
             cs.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             cs.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-            cs.ReceiveTimeout = timeout * 1000;
-            cs.SendTimeout = timeout * 1000;
-            IPAddress.TryParse(local_ip_address, out IPAddress ipAddress);
+            cs.ReceiveTimeout = Timeout * 1000;
+            cs.SendTimeout = Timeout * 1000;
+            IPAddress.TryParse(LocalIpAddress, out IPAddress ipAddress);
             cs.Bind(new IPEndPoint(ipAddress, 0));
 
-            //port = cs.getsockname()[1] - Dont know yet what this is used for
-
-            //starttime = time.time()
             DateTime starttime = DateTime.Now;
-
-            //devices = [];
+            
             List<BroadlinkDevice> devices = new List<BroadlinkDevice>();
 
-            //timezone = int(time.timezone / -3600) - Dont know yet what this is used for
-
-            //packet = bytearray(0x30)
             byte[] packet = new byte[0x30];
 
-            //timezone = int(time.timezone / -3600)
             DateTime currentTime = DateTime.Now;
 
             int timezone = (int)(System.TimeZoneInfo.Local.GetUtcOffset(currentTime).TotalSeconds / -3600);
 
-            //if timezone < 0:
-            //    packet[0x08] = 0xff + timezone - 1
-            //    packet[0x09] = 0xff
-            //    packet[0x0a] = 0xff
-            //    packet[0x0b] = 0xff
-            //else:
-            //    packet[0x08] = timezone
-            //    packet[0x09] = 0
-            //    packet[0x0a] = 0
-            //    packet[0x0b] = 0
-            //packet[0x0c] = year & 0xff
-            //packet[0x0d] = year >> 8
-            //packet[0x0e] = datetime.now().minute
-            //packet[0x0f] = datetime.now().hour
-            //subyear = str(year)[2:]
-            //packet[0x10] = int(subyear)
-            //packet[0x11] = datetime.now().isoweekday()
-            //packet[0x12] = datetime.now().day
-            //packet[0x13] = datetime.now().month
-            //packet[0x18] = int(address[0])
-            //packet[0x19] = int(address[1])
-            //packet[0x1a] = int(address[2])
-            //packet[0x1b] = int(address[3])
-            //packet[0x1c] = port & 0xff
-            //packet[0x1d] = port >> 8
-            //packet[0x26] = 6
-
+            
             if (timezone < 0)
             {
                 packet[0x08] = (byte)(0xff + timezone - 1);
@@ -300,13 +265,6 @@ namespace BroadlinkSharp
             packet[0x1d] = (byte)((port >> 8) & 0xff);
             packet[0x26] = 6;
 
-            //checksum = 0xbeaf
-            //for i in range(len(packet)):
-            //    checksum += packet[i]
-            //checksum = checksum & 0xffff
-            //packet[0x20] = checksum & 0xff
-            //packet[0x21] = checksum >> 8
-
             int checksum = 0xbeaf;
             foreach (byte b in packet)
             {
@@ -316,17 +274,11 @@ namespace BroadlinkSharp
             packet[0x20] = (byte)(checksum & 0xff);
             packet[0x21] = (byte)((checksum >> 8) & 0xff);
 
-            //cs.sendto(packet, ('255.255.255.255', 80))
             cs.SendTo(packet, new IPEndPoint(new IPAddress(new byte[] { 255, 255, 255, 255 }), 80));
 
-            // if timeout is None:
-            if (timeout <= 0)
+            if (Timeout <= 0)
             {
-                //response = cs.recvfrom(1024)
-                //responsepacket = bytearray(response[0])
-                //host = response[1]
-                //mac = responsepacket[0x3a:0x40]
-                //devtype = responsepacket[0x34] | responsepacket[0x35] << 8
+
                 byte[] response = new byte[1024];
                 EndPoint host = new IPEndPoint(0, 0);
                 cs.ReceiveFrom(response, ref host);
@@ -340,23 +292,7 @@ namespace BroadlinkSharp
             }
             else
             {
-
-
-                //while (time.time() - starttime) < timeout:
-                //  cs.settimeout(timeout - (time.time() - starttime)) - Will skip this
-                //  try:
-                //    response = cs.recvfrom(1024)
-                //  except socket.timeout:
-                //    return devices
-                //  responsepacket = bytearray(response[0])
-                //  host = response[1]
-                //  devtype = responsepacket[0x34] | responsepacket[0x35] << 8
-                //  mac = responsepacket[0x3a:0x40]
-                //  dev = gendevice(devtype, host, mac)
-                //  devices.append(dev)
-                //return devices
-
-                while ((DateTime.Now - starttime).TotalSeconds < timeout)
+                while ((DateTime.Now - starttime).TotalSeconds < Timeout)
                 {
                     try
                     {

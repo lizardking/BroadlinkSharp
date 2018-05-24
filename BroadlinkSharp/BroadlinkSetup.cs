@@ -1,4 +1,4 @@
-﻿//Setup a new Broadlink device via AP Mode. Review the README to see how to enter AP Mode.
+﻿//Setup a new Broadlink device via AP Mode. 
 //Class is untested, since I have naver managed to get the only Broadlink device I own into AP mode.
 //Code is based on https://github.com/mjg59/python-broadlink/blob/master/broadlink/__init__.py
 
@@ -10,7 +10,6 @@ using System.Text;
 
 namespace BroadlinkSharp
 {
-
 
     public static class BroadlinkSetup
     {
@@ -53,6 +52,13 @@ namespace BroadlinkSharp
         //sock.sendto(payload, ('255.255.255.255', 80)) 
         #endregion
 
+        /// <summary>
+        ///Setup a new Broadlink device via AP Mode. 
+        ///Broadlink device must be in AP mode before calling this method.
+        /// </summary>
+        /// <param name="SSID">The ssid of the WLAN.</param>
+        /// <param name="Password">The password of the WLAN.</param>
+        /// <param name="SecurityMode">The security mode of the WLAN.</param>
         public static void Setup(string SSID, string Password, BroadLinkSecurityModeEnum SecurityMode = BroadLinkSecurityModeEnum.None)
         {
             byte[] payload = new byte[0x88];

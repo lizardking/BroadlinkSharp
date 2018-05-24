@@ -9,6 +9,10 @@ using System.Text;
 
 namespace BroadlinkSharp
 {
+    /// <summary>
+    /// Controls a Dooya DT360E curtain motor.
+    /// </summary>
+    /// <seealso cref="BroadlinkSharp.BroadlinkDevice" />
     [BroadlinkDevice(0x4E4D,"Dooya DT360E")]
     public class Dooya : BroadlinkDevice
     {
@@ -91,23 +95,39 @@ namespace BroadlinkSharp
             }
         }
 
+        /// <summary>
+        /// Closes the curtain.
+        /// </summary>
+        /// <returns></returns>
         public int Close()
         {
             return Send(0x02, 0x00);
         }
 
 
+        /// <summary>
+        /// Opens the curtain.
+        /// </summary>
+        /// <returns></returns>
         public int Open()
         {
             return Send(0x01, 0x00);
         }
 
+        /// <summary>
+        /// Stop the curtain.
+        /// </summary>
+        /// <returns></returns>
         public int Stop()
         {
             return Send(0x03, 0x00);
         }
 
 
+        /// <summary>
+        /// Gets the curtain position in percent.
+        /// </summary>
+        /// <returns></returns>
         public int GetPercentage()
         {
             return Send(0x06, 0x5d);

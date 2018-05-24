@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace BroadlinkSharpTest
 {
+    /// <summary>
+    /// Test program for the BroadlinkSharp library.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
@@ -44,9 +47,6 @@ namespace BroadlinkSharpTest
             Console.WriteLine();
 
 
-
-
-            Console.WriteLine("");
             bool exitloop = false;
             while (!exitloop)
             {

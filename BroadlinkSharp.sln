@@ -5,7 +5,12 @@ VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BroadlinkSharp", "BroadlinkSharp\BroadlinkSharp.csproj", "{B0B04A7A-0AC5-473D-A625-48E301EE0359}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BroadlinkSharpTest", "BroadlinkSharpTest\BroadlinkSharpTest.csproj", "{9E620C11-64A2-4E04-927C-14809B20133F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BroadlinkSharpTest", "BroadlinkSharpTest\BroadlinkSharpTest.csproj", "{9E620C11-64A2-4E04-927C-14809B20133F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5441F0D-0CC5-4229-87FC-E4E7BF3F3870}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

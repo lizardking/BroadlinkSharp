@@ -11,6 +11,11 @@ using System.Text;
 
 namespace BroadlinkSharp
 {
+    /// <summary>
+    /// Generic Broadlink device class.
+    /// This is the base for all other Broadlink devices classes (they must inherit from this class to be recognized as Broadlink device classes).
+    /// If the discover process cant determine the type of device (e.g. if no specific device calss has been implemented) a instance of this generic device class will be returned.
+    /// </summary>
     public class BroadlinkDevice
     {
 
@@ -201,7 +206,7 @@ namespace BroadlinkSharp
 
         private IPEndPoint host;
         private byte[] mac;
-        public int DeviceTypeCode { get; private set; }
+
         private int timeout = 10;
         private int count = 0;
 
@@ -212,7 +217,20 @@ namespace BroadlinkSharp
         private byte[] iv = { 0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58 };
         private byte[] id = { 0, 0, 0, 0 };
 
+        /// <summary>
+        /// Gets the device type code.
+        /// </summary>
+        /// <value>
+        /// The device type code.
+        /// </value>
+        public int DeviceTypeCode { get; private set; }
 
+        /// <summary>
+        /// Gets the mac address of the device.
+        /// </summary>
+        /// <value>
+        /// The mac address.
+        /// </value>
         public string MacAddress
         {
             get
@@ -222,6 +240,12 @@ namespace BroadlinkSharp
         }
 
         private string _DeviceTypeDescription = null;
+        /// <summary>
+        /// Gets the device type description.
+        /// </summary>
+        /// <value>
+        /// The device type description.
+        /// </value>
         public string DeviceTypeDescription
         {
             get
@@ -247,6 +271,12 @@ namespace BroadlinkSharp
 
 
 
+        /// <summary>
+        /// Encrypts the specified data.
+        /// Use this method to encrypt the payload for commands (if needed).
+        /// </summary>
+        /// <param name="data">The unencypted data.</param>
+        /// <returns>Encrypted data</returns>
         protected byte[] Encrypt(byte[] data)
         {
             try
@@ -274,6 +304,12 @@ namespace BroadlinkSharp
 
         }
 
+        /// <summary>
+        /// Decrypts the specified data.
+        /// Use this method to decrypt the data returned from a Broadlink device (if needed).
+        /// </summary>
+        /// <param name="data">The encrypted data.</param>
+        /// <returns>Unencrypted data</returns>
         protected byte[] Decrypt(IEnumerable<byte> data)
         {
 
@@ -301,6 +337,10 @@ namespace BroadlinkSharp
             }
         }
 
+        /// <summary>
+        /// Authorizes connection to the Broadlink devices.
+        /// </summary>
+        /// <returns><c>true</c> if authorization was successful, otherwise <c>false</c></returns>
         public bool Authorize()
         {
             byte[] payload = new byte[0x50];
@@ -355,6 +395,13 @@ namespace BroadlinkSharp
 
 
 
+        /// <summary>
+        /// Sends a packet of data to the Broadlink devices and receives the answer (if provided)
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="payload">The payload/data packet.</param>
+        /// <returns></returns>
+        /// <exception cref="TimeoutException"></exception>
         protected byte[] SendPacket(byte command, byte[] payload)
         {
 
