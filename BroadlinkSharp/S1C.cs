@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 
 namespace BroadlinkSharp
@@ -62,7 +63,7 @@ namespace BroadlinkSharp
         //return result 
         #endregion
 
-        public S1C(IPEndPoint host, byte[] mac, int devtype, int timeout = 10) : base(host, mac, devtype, timeout)
+        public S1C(IPEndPoint host, PhysicalAddress mac, int devtype, int timeout = 10) : base(host, mac, devtype, timeout)
         {
             throw new NotImplementedException($"The logic for the {nameof(Hysen)} class has not (yet) been implemented");
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -176,16 +177,17 @@ namespace BroadlinkSharp
 
         Random Rnd = new Random();
 
-        public BroadlinkDevice(IPEndPoint host, byte[] mac, int deviceTypeCode, int timeout = 10)
+        public BroadlinkDevice(IPEndPoint host, PhysicalAddress MacAdress, int deviceTypeCode, int timeout = 10)
         {
-            Init(host, mac, deviceTypeCode, timeout);
+
+            Init(host, MacAdress, deviceTypeCode, timeout);
         }
 
 
-        private void Init(IPEndPoint host, byte[] mac, int deviceTypeCode, int timeout = 10)
+        private void Init(IPEndPoint host, PhysicalAddress MacAdress, int deviceTypeCode, int timeout = 10)
         {
             this.host = host;
-            this.mac = mac;
+            this.MacAdress = MacAdress;
             this.DeviceTypeCode = deviceTypeCode;
 
 
@@ -205,7 +207,13 @@ namespace BroadlinkSharp
         }
 
         private IPEndPoint host;
-        private byte[] mac;
+        /// <summary>
+        /// Gets the mac adress.
+        /// </summary>
+        /// <value>
+        /// The mac adress.
+        /// </value>
+        public PhysicalAddress MacAdress { get; private set; } = null;
 
         private int timeout = 10;
         private int count = 0;
@@ -225,19 +233,7 @@ namespace BroadlinkSharp
         /// </value>
         public int DeviceTypeCode { get; private set; }
 
-        /// <summary>
-        /// Gets the mac address of the device.
-        /// </summary>
-        /// <value>
-        /// The mac address.
-        /// </value>
-        public string MacAddress
-        {
-            get
-            {
-                return string.Join(":", mac);
-            }
-        }
+
 
         private string _DeviceTypeDescription = null;
         /// <summary>
@@ -421,12 +417,13 @@ namespace BroadlinkSharp
             packet[0x26] = command;
             packet[0x28] = (byte)(count & 0xff);
             packet[0x29] = (byte)((count >> 8) & 0xff);
-            packet[0x2a] = mac[0];
-            packet[0x2b] = mac[1];
-            packet[0x2c] = mac[2];
-            packet[0x2d] = mac[3];
-            packet[0x2e] = mac[4];
-            packet[0x2f] = mac[5];
+            byte[] m = MacAdress.GetAddressBytes();
+            packet[0x2a] = m[0];
+            packet[0x2b] = m[1];
+            packet[0x2c] = m[2];
+            packet[0x2d] = m[3];
+            packet[0x2e] = m[4];
+            packet[0x2f] = m[5];
             packet[0x30] = id[0];
             packet[0x31] = id[1];
             packet[0x32] = id[2];

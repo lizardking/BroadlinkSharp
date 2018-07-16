@@ -36,7 +36,7 @@ namespace BroadlinkSharpTest
                 return;
             }
 
-            Console.WriteLine($"Will control {nameof(Dooya)} device with mac address {dooyaCurtainMotor.MacAddress}");
+            Console.WriteLine($"Will control {nameof(Dooya)} device with mac adress {dooyaCurtainMotor.MacAdress.ToString()}");
             Console.WriteLine("Press o to open, c to close and s to stop the curtain motor. Presss x to exit.");
             Console.WriteLine();
 
