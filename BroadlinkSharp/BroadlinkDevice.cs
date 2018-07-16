@@ -177,17 +177,17 @@ namespace BroadlinkSharp
 
         Random Rnd = new Random();
 
-        public BroadlinkDevice(IPEndPoint host, PhysicalAddress MacAdress, int deviceTypeCode, int timeout = 10)
+        public BroadlinkDevice(IPEndPoint host, PhysicalAddress MacAddress, int deviceTypeCode, int timeout = 10)
         {
 
-            Init(host, MacAdress, deviceTypeCode, timeout);
+            Init(host, MacAddress, deviceTypeCode, timeout);
         }
 
 
-        private void Init(IPEndPoint host, PhysicalAddress MacAdress, int deviceTypeCode, int timeout = 10)
+        private void Init(IPEndPoint host, PhysicalAddress MacAddress, int deviceTypeCode, int timeout = 10)
         {
             this.host = host;
-            this.MacAdress = MacAdress;
+            this.MacAddress = MacAddress;
             this.DeviceTypeCode = deviceTypeCode;
 
 
@@ -208,12 +208,12 @@ namespace BroadlinkSharp
 
         private IPEndPoint host;
         /// <summary>
-        /// Gets the mac adress.
+        /// Gets the mac Address.
         /// </summary>
         /// <value>
-        /// The mac adress.
+        /// The mac Address.
         /// </value>
-        public PhysicalAddress MacAdress { get; private set; } = null;
+        public PhysicalAddress MacAddress { get; private set; } = null;
 
         private int timeout = 10;
         private int count = 0;
@@ -417,7 +417,7 @@ namespace BroadlinkSharp
             packet[0x26] = command;
             packet[0x28] = (byte)(count & 0xff);
             packet[0x29] = (byte)((count >> 8) & 0xff);
-            byte[] m = MacAdress.GetAddressBytes();
+            byte[] m = MacAddress.GetAddressBytes();
             packet[0x2a] = m[0];
             packet[0x2b] = m[1];
             packet[0x2c] = m[2];

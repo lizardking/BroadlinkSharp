@@ -290,11 +290,11 @@ namespace BroadlinkSharp
 
                 byte[] macbytes = new byte[6];
                 Array.ConstrainedCopy(response, 0x3a, macbytes, 0, 6);
-                PhysicalAddress macAdress = new PhysicalAddress(macbytes);
+                PhysicalAddress macAddress = new PhysicalAddress(macbytes);
 
                 int devtype = response[0x34] | response[0x35] << 8;
 
-                devices.Add(Gendevice(devtype, (IPEndPoint)host, macAdress));
+                devices.Add(Gendevice(devtype, (IPEndPoint)host, macAddress));
 
             }
             else
@@ -311,11 +311,11 @@ namespace BroadlinkSharp
 
                         byte[] macbytes = new byte[6];
                         Array.ConstrainedCopy(response, 0x3a, macbytes, 0, 6);
-                        PhysicalAddress macAdress = new PhysicalAddress(macbytes);
+                        PhysicalAddress macAddress = new PhysicalAddress(macbytes);
 
                         int devtype = response[0x34] | response[0x35] << 8;
 
-                        devices.Add(Gendevice(devtype, (IPEndPoint)host, macAdress));
+                        devices.Add(Gendevice(devtype, (IPEndPoint)host, macAddress));
                     }
                     catch(SocketException E)
                     {
