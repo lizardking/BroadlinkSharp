@@ -16,14 +16,14 @@ namespace BroadlinkSharpTest
 
             DateTime s = DateTime.Now;
 
-            List<BroadlinkDevice> devices = BroadLinkDiscovery.Discover(500, null);
+            List<BroadlinkDevice> devices = BroadLinkDiscovery.Discover(2000, null);
 
             Console.WriteLine($"Discover: {(DateTime.Now - s).TotalMilliseconds:0}ms");
 
             Console.WriteLine($"Found {devices.Count} Broadlink devices:");
             foreach (BroadlinkDevice device in devices)
             {
-                Console.WriteLine($"  Class: {device.GetType().Name}, Description: {device.DeviceTypeDescription}, Code: {device.DeviceTypeCode}");
+                Console.WriteLine($"  Class: {device.GetType().Name}, Description: {device.DeviceTypeDescription}, Code: {device.DeviceTypeCode}, Mac: {device.MacAddress.ToString()}");
             }
             Console.WriteLine();
 

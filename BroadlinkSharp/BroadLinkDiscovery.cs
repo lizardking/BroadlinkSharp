@@ -199,19 +199,46 @@ namespace BroadlinkSharp
         }
 
 
+        /// <summary>
+        /// Discovers a specific Broadlink device
+        /// </summary>
+        /// <param name="TimeoutMs">Timeout in milliseconds. 0 will only discover 1 device, values &gt;0 might discover several devices. If one of the devices found matches the MacAddress, this device will be return, otherwise null will be returned</param>
+        /// <param name="MacAddress">The mac address of the device to be found.</param>
+        /// <param name="LocalIpAddress">The local ip address. If para is null or blank, the IP of the computer running the code is used. If your computer has several IP addresses you might need to specify the correct one (Untested)(</param>
+        /// <returns>A broadlink device with the specified MacAddress. Otherwise null.</returns>
+        public static BroadlinkDevice DiscoverSpecificDevice(int TimeoutMs, string MacAddress = null, string LocalIpAddress = null)
+        {
+            string MacToFind = null;
+            if (!string.IsNullOrWhiteSpace(MacAddress))
+            {
+                MacToFind = PhysicalAddress.Parse(MacAddress.Replace(":", "-").ToUpper()).ToString();
+            }
+
+            return Discover(TimeoutMs, MacAddress, LocalIpAddress).FirstOrDefault(d => d.MacAddress.ToString() == MacAddress);
+        }
 
         /// <summary>
         /// Discovers the Broadlink devices on the network
         /// </summary>
-        /// <param name="TimeoutMs">Timeout in milliseconds. 0 will only discover 1 device, values >0 might discover several devices (discovery of several devices is not tested since I only own 1 Broadlink devices). Timeout specifies the timeout in milliseconds afdter the last device has been discovered.</param>
+        /// <param name="TimeoutMs">Timeout in milliseconds. 0 will only discover 1 device, values &gt;0 might discover several devices (discovery of several devices is not tested since I only own 1 Broadlink devices). Timeout specifies the timeout in milliseconds afdter the last device has been discovered.</param>
+        /// <param name="AbortOnMacAddress">The discover operation will stop, once a device with the given mac address has been found.</param>
         /// <param name="LocalIpAddress">The local ip address. If para is null or blank, the IP of the computer running the code is used. If your computer has several IP addresses you might need to specify the correct one (Untested)(</param>
-        /// <returns>List of BroadlinkDevices classes</returns>
-        public static List<BroadlinkDevice> Discover(int TimeoutMs, string LocalIpAddress = null)
+        /// <returns>
+        /// List of BroadlinkDevices classes
+        /// </returns>
+        /// <exception cref="Exception"></exception>
+        public static List<BroadlinkDevice> Discover(int TimeoutMs, string AbortOnMacAddress = null, string LocalIpAddress = null)
         {
 
             if (string.IsNullOrWhiteSpace(LocalIpAddress))
             {
                 LocalIpAddress = GetLocalIPAddress();
+            }
+
+            string MacToFind = null;
+            if (!string.IsNullOrWhiteSpace(AbortOnMacAddress))
+            {
+                MacToFind = PhysicalAddress.Parse(AbortOnMacAddress.Replace(":", "-").ToUpper()).ToString();
             }
 
 
@@ -315,7 +342,14 @@ namespace BroadlinkSharp
 
                         int devtype = response[0x34] | response[0x35] << 8;
 
-                        devices.Add(Gendevice(devtype, (IPEndPoint)host, macAddress));
+
+
+                        BroadlinkDevice newDevice = Gendevice(devtype, (IPEndPoint)host, macAddress);
+                        devices.Add(newDevice);
+                        if (MacToFind != null && newDevice.MacAddress.ToString() == MacToFind)
+                        {
+                            break;
+                        };
                     }
                     catch (SocketException E)
                     {
