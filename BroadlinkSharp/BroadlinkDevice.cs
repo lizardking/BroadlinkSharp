@@ -177,14 +177,15 @@ namespace BroadlinkSharp
 
         Random Rnd = new Random();
 
-        public BroadlinkDevice(IPEndPoint host, PhysicalAddress MacAddress, int deviceTypeCode, int timeout = 10)
+        public BroadlinkDevice(IPEndPoint host, PhysicalAddress MacAddress, int deviceTypeCode, int TimeoutMs=1000)
         {
 
-            Init(host, MacAddress, deviceTypeCode, timeout);
+            Init(host, MacAddress, deviceTypeCode, TimeoutMs);
+
         }
 
 
-        private void Init(IPEndPoint host, PhysicalAddress MacAddress, int deviceTypeCode, int timeout = 10)
+        private void Init(IPEndPoint host, PhysicalAddress MacAddress, int deviceTypeCode, int TimeoutMs)
         {
             this.host = host;
             this.MacAddress = MacAddress;
@@ -192,7 +193,7 @@ namespace BroadlinkSharp
 
 
 
-            this.timeout = timeout;
+            this.timeoutMs = TimeoutMs;
             this.count = Rnd.Next(0xffff);
 
 
@@ -215,7 +216,7 @@ namespace BroadlinkSharp
         /// </value>
         public PhysicalAddress MacAddress { get; private set; } = null;
 
-        private int timeout = 10;
+        private int timeoutMs = 1000;
         private int count = 0;
 
         private Socket cs;
@@ -262,6 +263,8 @@ namespace BroadlinkSharp
                 return _DeviceTypeDescription;
             }
         }
+
+
 
         private readonly object locker = new object();
 
@@ -481,7 +484,7 @@ namespace BroadlinkSharp
                     }
                     catch (Exception E)
                     {
-                        if ((DateTime.Now - starttime).TotalSeconds > timeout)
+                        if ((DateTime.Now - starttime).TotalSeconds > timeoutMs)
                         {
                             throw new TimeoutException($"Sending and/or receiving the packet has failed and/or timedout", E);
                         }

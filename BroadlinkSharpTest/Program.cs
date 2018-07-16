@@ -16,7 +16,7 @@ namespace BroadlinkSharpTest
 
             DateTime s = DateTime.Now;
 
-            List<BroadlinkDevice> devices = BroadLinkDiscovery.Discover(2, null);
+            List<BroadlinkDevice> devices = BroadLinkDiscovery.Discover(500, null);
 
             Console.WriteLine($"Discover: {(DateTime.Now - s).TotalMilliseconds:0}ms");
 

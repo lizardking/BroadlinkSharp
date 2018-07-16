@@ -203,10 +203,10 @@ namespace BroadlinkSharp
         /// <summary>
         /// Discovers the Broadlink devices on the network
         /// </summary>
-        /// <param name="Timeout">Timeout in seconds. 0 will only discover 1 device, values >0 might discover several devices (discovery of several devices is not tested since I only own 1 Broadlink devices). Timeout specifies the timeout in seconds afdter the last device has been discovered.</param>
+        /// <param name="TimeoutMs">Timeout in milliseconds. 0 will only discover 1 device, values >0 might discover several devices (discovery of several devices is not tested since I only own 1 Broadlink devices). Timeout specifies the timeout in milliseconds afdter the last device has been discovered.</param>
         /// <param name="LocalIpAddress">The local ip address. If para is null or blank, the IP of the computer running the code is used. If your computer has several IP addresses you might need to specify the correct one (Untested)(</param>
         /// <returns>List of BroadlinkDevices classes</returns>
-        public static List<BroadlinkDevice> Discover(double Timeout, string LocalIpAddress = null)
+        public static List<BroadlinkDevice> Discover(int TimeoutMs, string LocalIpAddress = null)
         {
 
             if (string.IsNullOrWhiteSpace(LocalIpAddress))
@@ -274,13 +274,13 @@ namespace BroadlinkSharp
             packet[0x20] = (byte)(checksum & 0xff);
             packet[0x21] = (byte)((checksum >> 8) & 0xff);
 
-            cs.ReceiveTimeout = (Timeout<=0?500: (int)(Timeout * 1000));
+            cs.ReceiveTimeout = (TimeoutMs <= 0 ? 500 : TimeoutMs);
             cs.SendTimeout = cs.ReceiveTimeout;
 
             cs.SendTo(packet, new IPEndPoint(new IPAddress(new byte[] { 255, 255, 255, 255 }), 80));
 
 
-            if (Timeout <= 0)
+            if (TimeoutMs <= 0)
             {
 
 
@@ -303,7 +303,7 @@ namespace BroadlinkSharp
                 {
                     try
                     {
-                      
+
 
                         byte[] response = new byte[1024];
                         EndPoint host = new IPEndPoint(0, 0);
@@ -317,7 +317,7 @@ namespace BroadlinkSharp
 
                         devices.Add(Gendevice(devtype, (IPEndPoint)host, macAddress));
                     }
-                    catch(SocketException E)
+                    catch (SocketException E)
                     {
                         if (E.SocketErrorCode == SocketError.TimedOut)
                         {
@@ -326,7 +326,7 @@ namespace BroadlinkSharp
                         }
                         else
                         {
-                            throw new Exception($"A unhandled SocketExcpetion occured. {E.Message}",E);
+                            throw new Exception($"A unhandled SocketExcpetion occured. {E.Message}", E);
                         }
                     }
                 }
