@@ -274,14 +274,15 @@ namespace BroadlinkSharp
             packet[0x20] = (byte)(checksum & 0xff);
             packet[0x21] = (byte)((checksum >> 8) & 0xff);
 
+            cs.ReceiveTimeout = (Timeout<=0?500: (int)(Timeout * 1000));
+            cs.SendTimeout = cs.ReceiveTimeout;
+
+            cs.SendTo(packet, new IPEndPoint(new IPAddress(new byte[] { 255, 255, 255, 255 }), 80));
 
 
             if (Timeout <= 0)
             {
-                cs.ReceiveTimeout = 500;
-                cs.SendTimeout = 500;
 
-                cs.SendTo(packet, new IPEndPoint(new IPAddress(new byte[] { 255, 255, 255, 255 }), 80));
 
                 byte[] response = new byte[1024];
                 EndPoint host = new IPEndPoint(0, 0);
@@ -298,14 +299,11 @@ namespace BroadlinkSharp
             }
             else
             {
-                cs.ReceiveTimeout = (int)(Timeout * 1000);
-                cs.SendTimeout = (int)(Timeout * 1000);
-
                 while (true)
                 {
                     try
                     {
-                        cs.SendTo(packet, new IPEndPoint(new IPAddress(new byte[] { 255, 255, 255, 255 }), 80));
+                      
 
                         byte[] response = new byte[1024];
                         EndPoint host = new IPEndPoint(0, 0);
